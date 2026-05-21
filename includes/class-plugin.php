@@ -35,6 +35,8 @@ final class DDA_Incident_Report_Plugin {
 		new DDA_Incident_Report_Form_Handler();
 		new DDA_Incident_Report_Admin();
 		new DDA_Incident_Report_Scoring();
+		new DDA_Incident_Report_Printer();
+		new DDA_Incident_Report_TutorLMS();
 	}
 
 	private function __clone() {}

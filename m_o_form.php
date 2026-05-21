@@ -34,8 +34,12 @@ require_once DDA_INCIDENT_REPORT_DIR . 'includes/class-assets.php';
 require_once DDA_INCIDENT_REPORT_DIR . 'includes/class-shortcode.php';
 require_once DDA_INCIDENT_REPORT_DIR . 'includes/class-form-handler.php';
 require_once DDA_INCIDENT_REPORT_DIR . 'includes/class-emailer.php';
+require_once DDA_INCIDENT_REPORT_DIR . 'includes/class-paper-view.php';
+require_once DDA_INCIDENT_REPORT_DIR . 'includes/class-print-view.php';
+require_once DDA_INCIDENT_REPORT_DIR . 'includes/class-printer.php';
 require_once DDA_INCIDENT_REPORT_DIR . 'includes/class-scoring.php';
 require_once DDA_INCIDENT_REPORT_DIR . 'includes/class-admin.php';
+require_once DDA_INCIDENT_REPORT_DIR . 'includes/class-tutorlms.php';
 require_once DDA_INCIDENT_REPORT_DIR . 'includes/class-plugin.php';
 
 register_activation_hook( __FILE__, array( 'DDA_Incident_Report_Activator', 'activate' ) );
