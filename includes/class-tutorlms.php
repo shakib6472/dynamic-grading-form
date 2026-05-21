@@ -27,8 +27,12 @@ class DDA_Incident_Report_TutorLMS {
 	const PER_PAGE        = 20;
 
 	public function __construct() {
+		// Tutor LMS exposes several different filters for the dashboard menu
+		// across versions — hook all of them so the tab shows up reliably.
 		add_filter( 'tutor_dashboard_pages', array( $this, 'add_dashboard_tab' ) );
-		add_filter( 'tutor_dashboard_instructor_nav_items', array( $this, 'add_instructor_nav_item' ), 11 );
+		add_filter( 'tutor_dashboard_pages_nav_items', array( $this, 'add_dashboard_tab' ) );
+		add_filter( 'tutor_dashboard_nav_ui_items', array( $this, 'add_dashboard_tab' ) );
+		add_filter( 'tutor_dashboard_instructor_nav_items', array( $this, 'add_dashboard_tab' ) );
 		add_action( 'tutor_dashboard/page/' . self::TAB_KEY, array( $this, 'render_dashboard_page' ) );
 		add_action( 'admin_post_' . self::SCORE_POST_ACTION, array( $this, 'handle_score_save' ) );
 		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_assets' ) );
@@ -47,27 +51,21 @@ class DDA_Incident_Report_TutorLMS {
 			$pages = array();
 		}
 
-		$pages[ self::TAB_KEY ] = array(
-			'title'    => __( 'Incident Reports', 'dda-incident-report' ),
-			'auth_cap' => 'tutor_instructor',
-			'icon'     => 'tutor-icon-clipboard',
-		);
-
-		return $pages;
-	}
-
-	public function add_instructor_nav_item( $items ) {
-		if ( ! is_array( $items ) ) {
-			return $items;
+		// Only show the tab to users who can review reports
+		// (admins, editors, TutorLMS instructors, DDA instructors).
+		// We gate at the filter level rather than relying on `auth_cap`
+		// because `auth_cap` only accepts a single capability string and
+		// `tutor_instructor` is a role, not a cap that admins have.
+		if ( ! is_user_logged_in() || ! DDA_Incident_Report_User_State::user_can_score() ) {
+			return $pages;
 		}
 
-		$items[ self::TAB_KEY ] = array(
+		$pages[ self::TAB_KEY ] = array(
 			'title' => __( 'Incident Reports', 'dda-incident-report' ),
-			'url'   => $this->dashboard_url(),
 			'icon'  => 'tutor-icon-clipboard',
 		);
 
-		return $items;
+		return $pages;
 	}
 
 	private function dashboard_url() {
@@ -107,11 +105,20 @@ class DDA_Incident_Report_TutorLMS {
 	}
 
 	private function is_dashboard_request() {
-		global $wp_query;
-		if ( ! isset( $wp_query->query_vars['tutor_dashboard_page'] ) ) {
-			return false;
+		$page = get_query_var( 'tutor_dashboard_page' );
+		if ( $page && self::TAB_KEY === $page ) {
+			return true;
 		}
-		return self::TAB_KEY === $wp_query->query_vars['tutor_dashboard_page'];
+		$sub = get_query_var( 'tutor_dashboard_sub_page' );
+		if ( $sub && self::TAB_KEY === $sub ) {
+			return true;
+		}
+		// Fallback for installs where the dashboard slug differs and the
+		// rewrite isn't matching — detect by URL segment.
+		if ( isset( $_SERVER['REQUEST_URI'] ) && false !== strpos( (string) $_SERVER['REQUEST_URI'], '/' . self::TAB_KEY ) ) {
+			return true;
+		}
+		return false;
 	}
 
 	/* ---------------------------------------------------------------------
