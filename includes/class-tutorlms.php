@@ -26,15 +26,24 @@ class DDA_Incident_Report_TutorLMS {
 	const SCORE_POST_ACTION = 'dda_tutor_score_save';
 	const PER_PAGE        = 20;
 
+	/** @var self|null */
+	private static $instance = null;
+
 	public function __construct() {
-		// Tutor LMS exposes several different filters for the dashboard menu
-		// across versions — hook all of them so the tab shows up reliably.
-		add_filter( 'tutor_dashboard_pages', array( $this, 'add_dashboard_tab' ) );
-		add_filter( 'tutor_dashboard_pages_nav_items', array( $this, 'add_dashboard_tab' ) );
-		add_filter( 'tutor_dashboard_nav_ui_items', array( $this, 'add_dashboard_tab' ) );
-		add_filter( 'tutor_dashboard_instructor_nav_items', array( $this, 'add_dashboard_tab' ) );
-		add_action( 'tutor_dashboard/page/' . self::TAB_KEY, array( $this, 'render_dashboard_page' ) );
+		self::$instance = $this;
+
+		// Tutor LMS uses slash-separated filter names (not underscore).
+		// Hook into BOTH the general dashboard nav AND the instructor section
+		// so admins (who don't have the tutor_instructor role) still see it.
+		add_filter( 'tutor_dashboard/nav_items', array( $this, 'add_dashboard_tab' ) );
+		add_filter( 'tutor_dashboard/instructor_nav_items', array( $this, 'add_dashboard_tab' ) );
+
+		// Route Tutor's template loader to our plugin folder for our page.
+		add_filter( 'tutor_get_template_path', array( $this, 'filter_template_path' ), 10, 2 );
+
+		// Score submission handler.
 		add_action( 'admin_post_' . self::SCORE_POST_ACTION, array( $this, 'handle_score_save' ) );
+
 		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_assets' ) );
 	}
 
@@ -51,11 +60,11 @@ class DDA_Incident_Report_TutorLMS {
 			$pages = array();
 		}
 
-		// Only show the tab to users who can review reports
+		// Only register the tab for users who can review reports
 		// (admins, editors, TutorLMS instructors, DDA instructors).
-		// We gate at the filter level rather than relying on `auth_cap`
-		// because `auth_cap` only accepts a single capability string and
-		// `tutor_instructor` is a role, not a cap that admins have.
+		// We gate here rather than relying on `auth_cap` because that only
+		// accepts a single capability string and `tutor_instructor` is a
+		// role admins don't have.
 		if ( ! is_user_logged_in() || ! DDA_Incident_Report_User_State::user_can_score() ) {
 			return $pages;
 		}
@@ -66,6 +75,30 @@ class DDA_Incident_Report_TutorLMS {
 		);
 
 		return $pages;
+	}
+
+	/**
+	 * Route Tutor's template loader to our plugin's tutor-templates/ folder
+	 * when it tries to load our dashboard page.
+	 *
+	 * @param string $template_location Default folder Tutor will look in.
+	 * @param string $template          Template slug Tutor is loading.
+	 */
+	public function filter_template_path( $template_location, $template ) {
+		$template = is_string( $template ) ? $template : '';
+
+		$candidates = array(
+			'dashboard.' . self::TAB_KEY,
+			'dashboard/' . self::TAB_KEY,
+			'dashboard.' . self::TAB_KEY . '.php',
+			'dashboard/' . self::TAB_KEY . '.php',
+		);
+
+		if ( in_array( $template, $candidates, true ) ) {
+			return trailingslashit( DDA_INCIDENT_REPORT_DIR . 'tutor-templates' );
+		}
+
+		return $template_location;
 	}
 
 	private function dashboard_url() {
@@ -84,7 +117,10 @@ class DDA_Incident_Report_TutorLMS {
 	 * ------------------------------------------------------------------ */
 
 	public function enqueue_assets() {
-		if ( ! $this->is_dashboard_request() ) {
+		if ( is_admin() ) {
+			return;
+		}
+		if ( ! $this->is_tutor_dashboard() ) {
 			return;
 		}
 
@@ -104,26 +140,50 @@ class DDA_Incident_Report_TutorLMS {
 		);
 	}
 
-	private function is_dashboard_request() {
-		$page = get_query_var( 'tutor_dashboard_page' );
-		if ( $page && self::TAB_KEY === $page ) {
+	/**
+	 * Robust Tutor-dashboard detection — works regardless of the dashboard's
+	 * URL slug or whether the rewrite has flushed.
+	 */
+	private function is_tutor_dashboard() {
+		// 1) Tutor utils helper.
+		if ( function_exists( 'tutor_utils' ) && method_exists( tutor_utils(), 'is_tutor_dashboard' ) ) {
+			if ( tutor_utils()->is_tutor_dashboard() ) {
+				return true;
+			}
+		}
+
+		// 2) Page contains the [tutor_dashboard] shortcode.
+		global $post;
+		if ( $post && ! empty( $post->post_content ) && function_exists( 'has_shortcode' ) ) {
+			if ( has_shortcode( $post->post_content, 'tutor_dashboard' ) ) {
+				return true;
+			}
+		}
+
+		// 3) URL contains /dashboard/.
+		$path = isset( $_SERVER['REQUEST_URI'] ) ? parse_url( (string) $_SERVER['REQUEST_URI'], PHP_URL_PATH ) : '';
+		if ( is_string( $path ) && false !== strpos( $path, '/dashboard/' ) ) {
 			return true;
 		}
-		$sub = get_query_var( 'tutor_dashboard_sub_page' );
-		if ( $sub && self::TAB_KEY === $sub ) {
-			return true;
-		}
-		// Fallback for installs where the dashboard slug differs and the
-		// rewrite isn't matching — detect by URL segment.
-		if ( isset( $_SERVER['REQUEST_URI'] ) && false !== strpos( (string) $_SERVER['REQUEST_URI'], '/' . self::TAB_KEY ) ) {
-			return true;
-		}
+
 		return false;
 	}
 
 	/* ---------------------------------------------------------------------
 	 * Page renderer
 	 * ------------------------------------------------------------------ */
+
+	/**
+	 * Static entry point for the Tutor LMS template file.
+	 * Reuses the already-constructed singleton instance so no hooks are
+	 * registered twice.
+	 */
+	public static function render() {
+		if ( null === self::$instance ) {
+			new self();
+		}
+		self::$instance->render_dashboard_page();
+	}
 
 	public function render_dashboard_page() {
 		if ( ! DDA_Incident_Report_User_State::user_can_score() ) {
