@@ -1,0 +1,622 @@
+/* DDA Incident Report — front-end styles */
+
+.dda-incident-app {
+	--dda-primary: #0B5FA3;
+	--dda-primary-dark: #084A82;
+	--dda-primary-light: #E0F2FE;
+	--dda-accent: #F59E0B;
+	--dda-success: #059669;
+	--dda-success-soft: #D1FAE5;
+	--dda-danger: #DC2626;
+	--dda-danger-soft: #FEE2E2;
+	--dda-info: #0EA5E9;
+	--dda-info-soft: #E0F2FE;
+	--dda-text: #0F172A;
+	--dda-text-muted: #475569;
+	--dda-text-faint: #94A3B8;
+	--dda-border: #E2E8F0;
+	--dda-border-strong: #CBD5E1;
+	--dda-bg: #F8FAFC;
+	--dda-bg-card: #FFFFFF;
+	--dda-bg-soft: #F1F5F9;
+	--dda-radius: 12px;
+	--dda-radius-sm: 8px;
+	--dda-shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.04);
+	--dda-shadow: 0 4px 12px rgba(15, 23, 42, 0.06);
+	--dda-shadow-lg: 0 12px 32px rgba(15, 23, 42, 0.10);
+	--dda-font-heading: 'Urbanist', 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+	--dda-font-body: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+
+	max-width: 1040px;
+	margin: 0 auto;
+	font-family: var(--dda-font-body);
+	color: var(--dda-text);
+	font-size: 15px;
+	line-height: 1.6;
+	-webkit-font-smoothing: antialiased;
+}
+
+.dda-incident-app * {
+	box-sizing: border-box;
+}
+
+/* ---------- Headings & text ---------- */
+.dda-incident-app .dda-heading {
+	font-family: var(--dda-font-heading);
+	font-size: 28px;
+	line-height: 1.25;
+	font-weight: 700;
+	color: var(--dda-text);
+	margin: 12px 0 8px;
+	letter-spacing: -0.01em;
+}
+
+.dda-incident-app .dda-lead {
+	color: var(--dda-text-muted);
+	font-size: 15px;
+	margin: 0 0 18px;
+	max-width: 60ch;
+}
+
+.dda-incident-app .dda-meta-line {
+	font-size: 13px;
+	color: var(--dda-text-faint);
+	margin-top: 6px;
+}
+
+/* ---------- Pills ---------- */
+.dda-incident-app .dda-pill {
+	display: inline-block;
+	font-family: var(--dda-font-body);
+	font-size: 11px;
+	font-weight: 600;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	padding: 5px 12px;
+	border-radius: 999px;
+	background: var(--dda-bg-soft);
+	color: var(--dda-text-muted);
+}
+
+.dda-incident-app .dda-pill-info {
+	background: var(--dda-info-soft);
+	color: var(--dda-primary-dark);
+}
+
+.dda-incident-app .dda-pill-pass {
+	background: var(--dda-success-soft);
+	color: var(--dda-success);
+}
+
+.dda-incident-app .dda-pill-fail {
+	background: var(--dda-danger-soft);
+	color: var(--dda-danger);
+}
+
+/* ---------- Buttons ---------- */
+.dda-incident-app .dda-btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+	font-family: var(--dda-font-body);
+	font-size: 14px;
+	font-weight: 600;
+	padding: 12px 24px;
+	border-radius: var(--dda-radius-sm);
+	border: 0;
+	cursor: pointer;
+	text-decoration: none;
+	transition: transform 0.08s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+
+.dda-incident-app .dda-btn-lg {
+	font-size: 15px;
+	padding: 14px 32px;
+}
+
+.dda-incident-app .dda-btn-primary {
+	background: var(--dda-primary);
+	color: #FFFFFF;
+	box-shadow: var(--dda-shadow-sm);
+}
+
+.dda-incident-app .dda-btn-primary:hover,
+.dda-incident-app .dda-btn-primary:focus {
+	background: var(--dda-primary-dark);
+	box-shadow: var(--dda-shadow);
+	color: #FFFFFF;
+}
+
+.dda-incident-app .dda-btn-primary:active {
+	transform: translateY(1px);
+}
+
+/* ---------- Flash messages ---------- */
+.dda-incident-app .dda-flash {
+	padding: 14px 18px;
+	border-radius: var(--dda-radius-sm);
+	font-size: 14px;
+	margin-bottom: 18px;
+	border: 1px solid transparent;
+}
+
+.dda-incident-app .dda-flash-success {
+	background: var(--dda-success-soft);
+	border-color: rgba(5, 150, 105, 0.25);
+	color: #065F46;
+}
+
+.dda-incident-app .dda-flash-error {
+	background: var(--dda-danger-soft);
+	border-color: rgba(220, 38, 38, 0.25);
+	color: #991B1B;
+}
+
+/* ---------- Cards / states ---------- */
+.dda-incident-app .dda-card {
+	background: var(--dda-bg-card);
+	border: 1px solid var(--dda-border);
+	border-radius: var(--dda-radius);
+	padding: 40px 32px;
+	box-shadow: var(--dda-shadow);
+}
+
+.dda-incident-app .dda-card-center {
+	text-align: center;
+}
+
+.dda-incident-app .dda-card-icon {
+	width: 64px;
+	height: 64px;
+	border-radius: 50%;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	background: var(--dda-primary-light);
+	color: var(--dda-primary);
+	margin-bottom: 12px;
+}
+
+.dda-incident-app .dda-icon-hourglass {
+	background: #FEF3C7;
+	color: var(--dda-accent);
+}
+
+.dda-incident-app .dda-card-center .dda-heading {
+	margin: 12px 0 8px;
+}
+
+.dda-incident-app .dda-card-center .dda-lead {
+	margin-left: auto;
+	margin-right: auto;
+}
+
+/* ---------- Form intro ---------- */
+.dda-incident-app .dda-form-intro {
+	padding: 32px;
+	background: linear-gradient(135deg, #FFFFFF 0%, #F1F5F9 100%);
+	border: 1px solid var(--dda-border);
+	border-radius: var(--dda-radius);
+	margin-bottom: 24px;
+	position: relative;
+	overflow: hidden;
+}
+
+.dda-incident-app .dda-form-intro::after {
+	content: "";
+	position: absolute;
+	right: -60px;
+	top: -60px;
+	width: 220px;
+	height: 220px;
+	border-radius: 50%;
+	background: radial-gradient(circle, var(--dda-primary-light) 0%, transparent 70%);
+	pointer-events: none;
+}
+
+.dda-incident-app .dda-form-intro .dda-heading {
+	margin-top: 10px;
+}
+
+/* ---------- Form sections ---------- */
+.dda-incident-app .dda-section {
+	background: var(--dda-bg-card);
+	border: 1px solid var(--dda-border);
+	border-radius: var(--dda-radius);
+	padding: 28px;
+	margin-bottom: 18px;
+	box-shadow: var(--dda-shadow-sm);
+}
+
+.dda-incident-app .dda-section-title {
+	font-family: var(--dda-font-heading);
+	font-size: 18px;
+	font-weight: 700;
+	color: var(--dda-text);
+	margin: 0 0 18px;
+	padding-bottom: 12px;
+	border-bottom: 2px solid var(--dda-primary);
+	display: flex;
+	align-items: center;
+	gap: 10px;
+}
+
+.dda-incident-app .dda-section-title::before {
+	content: "";
+	display: inline-block;
+	width: 6px;
+	height: 22px;
+	background: var(--dda-accent);
+	border-radius: 3px;
+}
+
+.dda-incident-app .dda-subsection-title {
+	font-family: var(--dda-font-heading);
+	font-size: 15px;
+	font-weight: 600;
+	color: var(--dda-text);
+	margin: 22px 0 10px;
+}
+
+.dda-incident-app .dda-helper {
+	font-size: 12px;
+	color: var(--dda-text-muted);
+	margin: -4px 0 12px;
+}
+
+.dda-incident-app .dda-callout {
+	background: #FFFBEB;
+	border: 1px solid #FCD34D;
+	border-left: 4px solid var(--dda-accent);
+	padding: 14px 16px;
+	border-radius: var(--dda-radius-sm);
+	margin: 14px 0;
+	font-size: 13px;
+	color: #78350F;
+}
+
+/* ---------- Form rows / columns ---------- */
+.dda-incident-app .dda-row {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 16px;
+	margin-bottom: 16px;
+}
+
+.dda-incident-app .dda-col {
+	flex: 1 1 220px;
+	min-width: 200px;
+}
+
+.dda-incident-app .dda-col-full {
+	flex: 1 1 100%;
+}
+
+.dda-incident-app label {
+	display: block;
+	font-size: 13px;
+	font-weight: 600;
+	color: var(--dda-text);
+	margin-bottom: 6px;
+}
+
+.dda-incident-app input[type="text"],
+.dda-incident-app input[type="date"],
+.dda-incident-app input[type="time"],
+.dda-incident-app input[type="tel"],
+.dda-incident-app input[type="email"],
+.dda-incident-app input[type="number"],
+.dda-incident-app textarea,
+.dda-incident-app select {
+	width: 100%;
+	padding: 10px 12px;
+	border: 1px solid var(--dda-border-strong);
+	border-radius: var(--dda-radius-sm);
+	font-size: 14px;
+	font-family: var(--dda-font-body);
+	background: #FFFFFF;
+	color: var(--dda-text);
+	transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.dda-incident-app textarea {
+	min-height: 130px;
+	resize: vertical;
+}
+
+.dda-incident-app input:focus,
+.dda-incident-app textarea:focus,
+.dda-incident-app select:focus {
+	outline: none;
+	border-color: var(--dda-primary);
+	box-shadow: 0 0 0 3px rgba(11, 95, 163, 0.15);
+}
+
+.dda-incident-app .dda-inline-other {
+	margin-top: 8px;
+}
+
+/* ---------- Check / radio groups ---------- */
+.dda-incident-app .dda-check-group {
+	display: grid;
+	grid-template-columns: 1fr;
+	gap: 8px;
+	margin: 8px 0;
+}
+
+.dda-incident-app .dda-check-group-2 {
+	grid-template-columns: repeat(2, 1fr);
+}
+
+.dda-incident-app .dda-check-group-3 {
+	grid-template-columns: repeat(3, 1fr);
+}
+
+.dda-incident-app .dda-check-group label {
+	font-weight: 400;
+	font-size: 13.5px;
+	color: var(--dda-text-muted);
+	display: flex;
+	align-items: flex-start;
+	gap: 8px;
+	cursor: pointer;
+	padding: 6px 8px;
+	border-radius: 6px;
+	transition: background 0.12s ease;
+}
+
+.dda-incident-app .dda-check-group label:hover {
+	background: var(--dda-bg-soft);
+	color: var(--dda-text);
+}
+
+.dda-incident-app .dda-inline-radios label {
+	display: inline-flex;
+	gap: 6px;
+	font-weight: 500;
+	font-size: 13px;
+	margin-right: 14px;
+	color: var(--dda-text-muted);
+	cursor: pointer;
+}
+
+.dda-incident-app input[type="checkbox"],
+.dda-incident-app input[type="radio"] {
+	accent-color: var(--dda-primary);
+	margin-top: 2px;
+}
+
+/* ---------- Notification grid ---------- */
+.dda-incident-app .dda-grid-3 {
+	display: grid;
+	grid-template-columns: 2fr 1.2fr 1.4fr;
+	gap: 10px;
+	align-items: center;
+}
+
+.dda-incident-app .dda-grid-datetime {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 8px;
+}
+
+.dda-incident-app .dda-notification-row {
+	padding: 10px 0;
+	border-bottom: 1px dashed var(--dda-border);
+}
+
+.dda-incident-app .dda-notification-row:last-child {
+	border-bottom: 0;
+}
+
+.dda-incident-app .dda-grid-3 label.dda-check {
+	font-weight: 500;
+	font-size: 13.5px;
+	color: var(--dda-text);
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.dda-incident-app .dda-other-inline {
+	margin-left: 8px;
+	width: auto;
+	flex: 1;
+}
+
+.dda-incident-app .dda-required {
+	color: var(--dda-danger);
+	margin-left: 2px;
+}
+
+/* ---------- Submit bar ---------- */
+.dda-incident-app .dda-submit-bar {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 14px;
+	padding: 28px;
+	background: var(--dda-bg-card);
+	border: 1px solid var(--dda-border);
+	border-radius: var(--dda-radius);
+	margin-top: 8px;
+	text-align: center;
+}
+
+.dda-incident-app .dda-submit-note {
+	color: var(--dda-text-muted);
+	font-size: 13px;
+	margin: 0;
+	max-width: 56ch;
+}
+
+/* ---------- Result card ---------- */
+.dda-incident-app .dda-result-card {
+	background: var(--dda-bg-card);
+	border: 1px solid var(--dda-border);
+	border-radius: var(--dda-radius);
+	box-shadow: var(--dda-shadow);
+	overflow: hidden;
+}
+
+.dda-incident-app .dda-result-header {
+	padding: 36px 32px 24px;
+	text-align: center;
+	background: linear-gradient(180deg, #FFFFFF 0%, var(--dda-bg) 100%);
+	border-bottom: 1px solid var(--dda-border);
+}
+
+.dda-incident-app .dda-status-pass .dda-result-header {
+	background: linear-gradient(180deg, var(--dda-success-soft) 0%, #FFFFFF 80%);
+}
+
+.dda-incident-app .dda-status-fail .dda-result-header {
+	background: linear-gradient(180deg, var(--dda-danger-soft) 0%, #FFFFFF 80%);
+}
+
+.dda-incident-app .dda-status-pass .dda-pill {
+	background: var(--dda-success);
+	color: #FFFFFF;
+}
+
+.dda-incident-app .dda-status-fail .dda-pill {
+	background: var(--dda-danger);
+	color: #FFFFFF;
+}
+
+/* Score display with conic-gradient ring */
+.dda-incident-app .dda-score-display {
+	display: grid;
+	grid-template-columns: auto 1fr;
+	align-items: center;
+	gap: 28px;
+	padding: 28px 32px;
+}
+
+.dda-incident-app .dda-score-ring {
+	--dda-progress: 0;
+	width: 140px;
+	height: 140px;
+	border-radius: 50%;
+	background: conic-gradient(var(--dda-primary) calc(var(--dda-progress) * 1%), #E2E8F0 0);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	position: relative;
+}
+
+.dda-incident-app .dda-status-pass .dda-score-ring {
+	background: conic-gradient(var(--dda-success) calc(var(--dda-progress) * 1%), #E2E8F0 0);
+}
+
+.dda-incident-app .dda-status-fail .dda-score-ring {
+	background: conic-gradient(var(--dda-danger) calc(var(--dda-progress) * 1%), #E2E8F0 0);
+}
+
+.dda-incident-app .dda-score-ring-inner {
+	width: 110px;
+	height: 110px;
+	border-radius: 50%;
+	background: #FFFFFF;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+}
+
+.dda-incident-app .dda-score-number {
+	font-family: var(--dda-font-heading);
+	font-size: 36px;
+	font-weight: 800;
+	line-height: 1;
+	color: var(--dda-text);
+}
+
+.dda-incident-app .dda-score-suffix {
+	font-size: 11px;
+	color: var(--dda-text-muted);
+	font-weight: 600;
+	letter-spacing: 0.05em;
+	margin-top: 4px;
+	text-transform: uppercase;
+}
+
+.dda-incident-app .dda-score-detail {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+}
+
+.dda-incident-app .dda-score-row {
+	display: flex;
+	justify-content: space-between;
+	padding: 10px 14px;
+	background: var(--dda-bg-soft);
+	border-radius: var(--dda-radius-sm);
+	font-size: 14px;
+}
+
+.dda-incident-app .dda-score-label {
+	color: var(--dda-text-muted);
+}
+
+.dda-incident-app .dda-score-value {
+	color: var(--dda-text);
+	font-weight: 600;
+}
+
+.dda-incident-app .dda-feedback {
+	margin: 0 32px 32px;
+	padding: 20px 22px;
+	background: var(--dda-bg-soft);
+	border-left: 4px solid var(--dda-primary);
+	border-radius: var(--dda-radius-sm);
+}
+
+.dda-incident-app .dda-feedback-title {
+	font-family: var(--dda-font-heading);
+	font-size: 14px;
+	font-weight: 700;
+	margin: 0 0 8px;
+	color: var(--dda-text);
+	letter-spacing: 0.02em;
+	text-transform: uppercase;
+}
+
+.dda-incident-app .dda-feedback p {
+	margin: 0;
+	color: var(--dda-text-muted);
+	font-size: 14px;
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 720px) {
+	.dda-incident-app .dda-heading {
+		font-size: 22px;
+	}
+
+	.dda-incident-app .dda-section,
+	.dda-incident-app .dda-card,
+	.dda-incident-app .dda-form-intro {
+		padding: 22px;
+	}
+
+	.dda-incident-app .dda-check-group-2,
+	.dda-incident-app .dda-check-group-3 {
+		grid-template-columns: 1fr;
+	}
+
+	.dda-incident-app .dda-grid-3 {
+		grid-template-columns: 1fr;
+	}
+
+	.dda-incident-app .dda-score-display {
+		grid-template-columns: 1fr;
+		text-align: center;
+	}
+
+	.dda-incident-app .dda-score-ring {
+		margin: 0 auto;
+	}
+}
