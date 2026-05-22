@@ -103,19 +103,47 @@ class DDA_Incident_Report_User_State {
 		if ( $user ) {
 			$roles = (array) $user->roles;
 
-			// Administrators and editors via the standard post cap.
-			if ( user_can( $check_id, 'edit_others_posts' ) ) {
+			// Standard WP capabilities — admins and editors pass via these.
+			if ( user_can( $check_id, 'manage_options' )      // Administrator.
+				|| user_can( $check_id, 'edit_others_posts' ) // Editor.
+			) {
 				$can = true;
 			}
 
-			// TutorLMS instructors (free + Pro both use this role).
-			if ( ! $can && in_array( 'tutor_instructor', $roles, true ) ) {
-				$can = true;
+			if ( ! $can ) {
+				// Common instructor / reviewer role keys.
+				$reviewer_roles = array(
+					'administrator',
+					'editor',
+					'tutor_instructor',
+					'dda_instructor',
+				);
+
+				// Honor whatever role key TutorLMS reports at runtime
+				// (Pro and custom builds occasionally vary).
+				if ( function_exists( 'tutor' ) ) {
+					$tutor = tutor();
+					if ( is_object( $tutor ) && isset( $tutor->instructor_role ) && $tutor->instructor_role ) {
+						$reviewer_roles[] = (string) $tutor->instructor_role;
+					}
+				}
+
+				foreach ( $reviewer_roles as $role ) {
+					if ( in_array( $role, $roles, true ) ) {
+						$can = true;
+						break;
+					}
+				}
 			}
 
-			// Our own DDA Instructor role.
-			if ( ! $can && in_array( 'dda_instructor', $roles, true ) ) {
-				$can = true;
+			// Final fallback: ask TutorLMS itself if this user is an instructor.
+			if ( ! $can && function_exists( 'tutor_utils' ) ) {
+				$utils = tutor_utils();
+				if ( $utils && method_exists( $utils, 'is_instructor' ) ) {
+					if ( $utils->is_instructor( $check_id ) ) {
+						$can = true;
+					}
+				}
 			}
 		}
 

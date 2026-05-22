@@ -52,6 +52,48 @@ class DDA_Incident_Report_Print_View {
 		$notifications = $g( 'notifications' );
 		$notifications = is_array( $notifications ) ? $notifications : array();
 
+		// Submitter info, used to pre-fill the scenario test sheet.
+		$author          = get_userdata( (int) $post->post_author );
+		$submitter_name  = $author ? $author->display_name : '';
+		$submitted_at    = (string) $g( 'submitted_at' );
+		$submitter_date  = $submitted_at
+			? mysql2date( get_option( 'date_format' ), $submitted_at )
+			: $date;
+
+		/**
+		 * Filter the training scenario printed before the form.
+		 * Return an array with keys: title, instructions, narrative
+		 * (string or array of paragraphs), additional, circle (array of
+		 * "Role – Name" lines).
+		 *
+		 * @param array $scenario
+		 * @param int   $post_id
+		 */
+		$scenario = apply_filters( 'dda_incident_report_print_scenario', array(
+			'title'        => 'DDA Phase I Training Test: Incident Management Scenario 1',
+			'instructions' => 'Read the following scenario and use the information to complete the incident report for your agency. (Note to trainers: You may use any or all of the four scenarios for this test. Pass out a blank incident report along with the scenario and develop a grading rubric to determine the grade for each person.)',
+			'narrative'    => array(
+				'Donna Brown is a 41 year old female who was born on March 11, 1973. Ms. Brown lives at 3330 Floral Ave., NW Washington, DC with two friends that she has known since residing at Forest Haven. On Monday, February 24, 2015 at approximately 11pm as Ms. Brown was walking to her bedroom, she spilled the tea she was carrying on her shirt. After this, she went to the restroom and began cleaning herself up. Ms. Brown\'s staff, Doreen Johnson, came into the restroom and saw Ms. Brown attempting to clean herself and started yelling. Ms. Johnson then proceeded to push Ms. Brown into her bedroom and down onto her bed, while yelling that she was making a big mess. While being pushed down on the bed, Ms. Brown hit her head on the headboard and began crying. After hearing the noise, a second staff person in the home, Muriel Blackwell, came upstairs to find Ms. Brown on the bed naked, holding her head, and crying. When Ms. Blackwell asked what happened, Ms. Brown removed her hand from her head exposing a big gash just above her left temple. Ms. Brown told Ms. Blackwell that Ms. Johnson pushed her onto the bed and she hit her head. Ms. Johnson denied pushing Ms. Brown and said that she fell onto the bed on her own. Ms. Blackwell went downstairs and called the nurse who instructed her to take Ms. Brown to the nearest emergency room. Ms. Blackwell made the rest of the appropriate notifications. Please write the report as if you are Ms. Blackwell and be sure to document everyone Ms. Blackwell is required to notify.',
+			),
+			'additional'   => 'This incident was discovered.',
+			'circle'       => array(
+				'Administrator – Jamie Pines',
+				'Attorney – Johnny Cochran',
+				'Department of Health Contact – Roy Rogers',
+				'Department on Disability Services Service Coordinator – Ronald McDonald',
+				'Family/Guardian – James Brown',
+				'Incident Management Coordinator – Lisa Stern',
+				'Nurse – Jackie Jones',
+				'Program Coordinator/House Manager – Elton John',
+				'Program Director – Tina Turner',
+				'Support Coordinator/QIDP – Michael Jackson',
+			),
+		), $pid );
+
+		$scen_narrative_paras = is_array( $scenario['narrative'] )
+			? $scenario['narrative']
+			: array( (string) $scenario['narrative'] );
+
 		?><!DOCTYPE html>
 <html lang="<?php echo esc_attr( get_bloginfo( 'language' ) ); ?>">
 <head>
@@ -62,8 +104,22 @@ class DDA_Incident_Report_Print_View {
 	@page { size: Letter; margin: 0.35in 0.45in; }
 	@media print {
 		.no-print { display: none !important; }
-		body { background: #fff !important; }
-		.sheet { box-shadow: none !important; margin: 0 !important; }
+		body { background: #fff !important; margin: 0 !important; padding: 0 !important; }
+		.sheet {
+			width: 100% !important;
+			max-width: 100% !important;
+			min-height: 0 !important;
+			margin: 0 !important;
+			padding: 0 !important;
+			box-shadow: none !important;
+			background: #fff !important;
+			page-break-after: always;
+			break-after: page;
+		}
+		.sheet:last-of-type {
+			page-break-after: auto;
+			break-after: auto;
+		}
 	}
 	* { box-sizing: border-box; }
 	html, body { margin: 0; padding: 0; }
@@ -365,11 +421,97 @@ class DDA_Incident_Report_Print_View {
 		font-size: 9pt;
 	}
 
-	.page1-pgnum, .page2-pgnum {
+	.page1-pgnum, .page2-pgnum, .scen-pgnum {
 		text-align: center;
 		font-size: 9pt;
 		margin-top: 8pt;
 	}
+
+	/* ----- Scenario pages (prepended before form) ----- */
+	.scen {
+		font-family: 'Times New Roman', Times, serif;
+		color: #000;
+		font-size: 11pt;
+		line-height: 1.45;
+	}
+	.scen-banner {
+		background: linear-gradient(180deg, #1F4E79 0%, #2E75B6 100%);
+		color: #fff;
+		padding: 10pt 14pt;
+		text-align: center;
+		font-family: Arial, Helvetica, sans-serif;
+		margin-bottom: 14pt;
+	}
+	.scen-banner .b1 {
+		font-size: 9.5pt;
+		font-weight: 600;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+		opacity: 0.85;
+	}
+	.scen-banner .b2 {
+		font-size: 14pt;
+		font-weight: 700;
+		margin-top: 3pt;
+	}
+	.scen-title {
+		font-family: Arial, Helvetica, sans-serif;
+		color: #1F4E79;
+		font-weight: bold;
+		font-size: 13pt;
+		margin: 0 0 12pt;
+	}
+	.scen-meta {
+		display: flex;
+		gap: 30pt;
+		margin: 10pt 0 14pt;
+		font-size: 10pt;
+	}
+	.scen-meta .lbl { font-weight: bold; }
+	.scen-meta .fill {
+		border-bottom: 1pt solid #000;
+		display: inline-block;
+		min-width: 2.6in;
+		padding: 0 4pt;
+	}
+	.scen-meta .fill.short { min-width: 1.5in; }
+	.scen-section {
+		margin: 12pt 0;
+	}
+	.scen-section .scen-lead {
+		font-weight: bold;
+		color: #1F4E79;
+		font-family: Arial, Helvetica, sans-serif;
+		font-size: 11pt;
+		margin-bottom: 4pt;
+	}
+	.scen-narrative p {
+		margin: 0 0 8pt;
+		text-align: justify;
+	}
+	.scen-additional {
+		border-left: 3pt solid #1F4E79;
+		background: #F3F8FC;
+		padding: 8pt 12pt;
+		margin: 12pt 0;
+	}
+	.scen-additional .scen-lead {
+		margin-bottom: 2pt;
+	}
+	.scen-circle {
+		margin-top: 10pt;
+	}
+	.scen-circle ul {
+		margin: 6pt 0 0 22pt;
+		padding: 0;
+	}
+	.scen-circle li {
+		margin: 2pt 0;
+		font-size: 10.5pt;
+		line-height: 1.5;
+		list-style: disc;
+	}
+	.scen-circle li strong { font-weight: 600; }
 </style>
 </head>
 <body>
@@ -385,7 +527,59 @@ class DDA_Incident_Report_Print_View {
 	</div>
 </div>
 
-<!-- =================== PAGE 1 =================== -->
+<!-- =================== SCENARIO PAGE 1 =================== -->
+<div class="sheet">
+	<div class="scen">
+		<div class="scen-banner">
+			<div class="b1">DDA Phase I Training Test</div>
+			<div class="b2">Incident Management — Scenario</div>
+		</div>
+
+		<h1 class="scen-title"><?php echo esc_html( (string) $scenario['title'] ); ?></h1>
+
+		<div class="scen-meta">
+			<div><span class="lbl">Name:</span> <span class="fill"><?php echo esc_html( $submitter_name ); ?></span></div>
+			<div><span class="lbl">Date:</span> <span class="fill short"><?php echo esc_html( $submitter_date ); ?></span></div>
+		</div>
+
+		<div class="scen-section">
+			<div class="scen-lead">Instructions</div>
+			<p><?php echo esc_html( (string) $scenario['instructions'] ); ?></p>
+		</div>
+
+		<div class="scen-section scen-narrative">
+			<div class="scen-lead">Scenario</div>
+			<?php foreach ( $scen_narrative_paras as $para ) : ?>
+				<p><?php echo esc_html( (string) $para ); ?></p>
+			<?php endforeach; ?>
+		</div>
+	</div>
+
+	<div class="scen-pgnum">Scenario — Page 1 of 2</div>
+</div>
+
+<!-- =================== SCENARIO PAGE 2 =================== -->
+<div class="sheet">
+	<div class="scen">
+		<div class="scen-additional">
+			<div class="scen-lead">Additional Information</div>
+			<p style="margin:0;"><?php echo esc_html( (string) $scenario['additional'] ); ?></p>
+		</div>
+
+		<div class="scen-section scen-circle">
+			<div class="scen-lead">Ms. Brown&rsquo;s Circle of Support Includes</div>
+			<ul>
+				<?php foreach ( (array) $scenario['circle'] as $line ) : ?>
+					<li><?php echo esc_html( (string) $line ); ?></li>
+				<?php endforeach; ?>
+			</ul>
+		</div>
+	</div>
+
+	<div class="scen-pgnum">Scenario — Page 2 of 2</div>
+</div>
+
+<!-- =================== FORM PAGE 1 =================== -->
 <div class="sheet">
 	<div class="hdr">
 		<span class="flag">
@@ -638,7 +832,7 @@ class DDA_Incident_Report_Print_View {
 	<div class="page1-pgnum">Page 1 of 2</div>
 </div>
 
-<!-- =================== PAGE 2 =================== -->
+<!-- =================== FORM PAGE 2 =================== -->
 <div class="sheet">
 	<div class="box">
 		<div class="runner">
