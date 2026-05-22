@@ -28,7 +28,6 @@ class DDA_Incident_Report_TutorLMS {
 
 	/** @var self|null */
 	private static $instance = null;
-
 	public function __construct() {
 		self::$instance = $this;
 
@@ -43,9 +42,33 @@ class DDA_Incident_Report_TutorLMS {
 		// includes our tutor-templates/dashboard/incident-reports.php.
 
 		// Score submission handler.
+		//
+		// We listen on `template_redirect` (frontend) instead of solely
+		// on `admin_post_X` because Tutor LMS Pro's "Disable admin
+		// access" feature blocks /wp-admin/admin-post.php for
+		// instructors with an "Access Denied!" page before our handler
+		// runs. Intercepting on the dashboard URL itself avoids it.
+		add_action( 'template_redirect', array( $this, 'maybe_handle_score_save' ), 1 );
+
+		// Kept as a fallback for users not blocked from /wp-admin/
+		// (e.g. administrators with bookmarks).
 		add_action( 'admin_post_' . self::SCORE_POST_ACTION, array( $this, 'handle_score_save' ) );
 
 		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_assets' ) );
+	}
+
+	/**
+	 * Catches the score-save POST on the dashboard URL before Tutor LMS
+	 * starts rendering. Sidesteps Tutor Pro's admin-area block.
+	 */
+	public function maybe_handle_score_save() {
+		if ( empty( $_SERVER['REQUEST_METHOD'] ) || 'POST' !== strtoupper( (string) $_SERVER['REQUEST_METHOD'] ) ) {
+			return;
+		}
+		if ( empty( $_POST['dda_action'] ) || 'save_score' !== $_POST['dda_action'] ) {
+			return;
+		}
+		$this->handle_score_save();
 	}
 
 	private function tutor_active() {
@@ -429,8 +452,8 @@ class DDA_Incident_Report_TutorLMS {
 
 				<aside class="dda-tutor-score-panel">
 					<h3 class="dda-tutor-score-title"><?php esc_html_e( 'Review & Score', 'dda-incident-report' ); ?></h3>
-					<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="dda-tutor-score-form">
-						<input type="hidden" name="action" value="<?php echo esc_attr( self::SCORE_POST_ACTION ); ?>">
+					<form method="post" action="<?php echo esc_url( $this->report_detail_url( $report_id ) ); ?>" class="dda-tutor-score-form">
+						<input type="hidden" name="dda_action" value="save_score">
 						<input type="hidden" name="report_id" value="<?php echo (int) $report_id; ?>">
 						<?php wp_nonce_field( self::NONCE_ACTION, self::NONCE_NAME ); ?>
 						<div class="dda-score-box">

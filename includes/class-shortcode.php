@@ -180,7 +180,7 @@ class DDA_Incident_Report_Shortcode {
 		<div class="dda-form-intro">
 			<span class="dda-pill dda-pill-info"><?php esc_html_e( 'Assessment', 'dda-incident-report' ); ?></span>
 			<h2 class="dda-heading"><?php esc_html_e( 'DDA Incident Report', 'dda-incident-report' ); ?></h2>
-			<p class="dda-lead"><?php esc_html_e( 'Complete every required field. You can only submit this form once — please review your answers carefully before submitting.', 'dda-incident-report' ); ?></p>
+			<p class="dda-lead"><?php esc_html_e( 'Read the scenario below, then complete every required field. You can only submit this form once — please review your answers carefully before submitting.', 'dda-incident-report' ); ?></p>
 			<div class="dda-meta-line">
 				<?php
 				/* translators: %s: user display name */
@@ -188,6 +188,8 @@ class DDA_Incident_Report_Shortcode {
 				?>
 			</div>
 		</div>
+
+		<?php $this->render_scenario(); ?>
 
 		<form method="post" action="<?php echo $submit_url; ?>" class="dda-incident-form" novalidate>
 			<input type="hidden" name="action" value="dda_incident_submit">
@@ -202,6 +204,47 @@ class DDA_Incident_Report_Shortcode {
 				</button>
 			</div>
 		</form>
+		<?php
+	}
+
+	private function render_scenario() {
+		$scenario      = DDA_Incident_Report_Fields::scenario();
+		$narrative     = is_array( $scenario['narrative'] ) ? $scenario['narrative'] : array( (string) $scenario['narrative'] );
+		?>
+		<details class="dda-scenario" open>
+			<summary class="dda-scenario-summary">
+				<span class="dda-scenario-pill"><?php esc_html_e( 'Scenario', 'dda-incident-report' ); ?></span>
+				<span class="dda-scenario-title"><?php echo esc_html( (string) $scenario['title'] ); ?></span>
+				<span class="dda-scenario-toggle" aria-hidden="true"></span>
+			</summary>
+			<div class="dda-scenario-body">
+				<div class="dda-scenario-block">
+					<h4 class="dda-scenario-h"><?php esc_html_e( 'Instructions', 'dda-incident-report' ); ?></h4>
+					<p><?php echo esc_html( (string) $scenario['instructions'] ); ?></p>
+				</div>
+
+				<div class="dda-scenario-block">
+					<h4 class="dda-scenario-h"><?php esc_html_e( 'Scenario', 'dda-incident-report' ); ?></h4>
+					<?php foreach ( $narrative as $para ) : ?>
+						<p><?php echo esc_html( (string) $para ); ?></p>
+					<?php endforeach; ?>
+				</div>
+
+				<div class="dda-scenario-callout">
+					<strong><?php esc_html_e( 'Additional Information:', 'dda-incident-report' ); ?></strong>
+					<?php echo esc_html( (string) $scenario['additional'] ); ?>
+				</div>
+
+				<div class="dda-scenario-block">
+					<h4 class="dda-scenario-h"><?php esc_html_e( 'Ms. Brown’s Circle of Support', 'dda-incident-report' ); ?></h4>
+					<ul class="dda-scenario-circle">
+						<?php foreach ( (array) $scenario['circle'] as $line ) : ?>
+							<li><?php echo esc_html( (string) $line ); ?></li>
+						<?php endforeach; ?>
+					</ul>
+				</div>
+			</div>
+		</details>
 		<?php
 	}
 
