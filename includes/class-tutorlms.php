@@ -38,8 +38,9 @@ class DDA_Incident_Report_TutorLMS {
 		add_filter( 'tutor_dashboard/nav_items', array( $this, 'add_dashboard_tab' ) );
 		add_filter( 'tutor_dashboard/instructor_nav_items', array( $this, 'add_dashboard_tab' ) );
 
-		// Route Tutor's template loader to our plugin folder for our page.
-		add_filter( 'tutor_get_template_path', array( $this, 'filter_template_path' ), 10, 2 );
+		// Note: page rendering is delegated to a theme-side loader file
+		// (see theme-upload/tutor/dashboard/incident-reports.php) which
+		// includes our tutor-templates/dashboard/incident-reports.php.
 
 		// Score submission handler.
 		add_action( 'admin_post_' . self::SCORE_POST_ACTION, array( $this, 'handle_score_save' ) );
@@ -75,30 +76,6 @@ class DDA_Incident_Report_TutorLMS {
 		);
 
 		return $pages;
-	}
-
-	/**
-	 * Route Tutor's template loader to our plugin's tutor-templates/ folder
-	 * when it tries to load our dashboard page.
-	 *
-	 * @param string $template_location Default folder Tutor will look in.
-	 * @param string $template          Template slug Tutor is loading.
-	 */
-	public function filter_template_path( $template_location, $template ) {
-		$template = is_string( $template ) ? $template : '';
-
-		$candidates = array(
-			'dashboard.' . self::TAB_KEY,
-			'dashboard/' . self::TAB_KEY,
-			'dashboard.' . self::TAB_KEY . '.php',
-			'dashboard/' . self::TAB_KEY . '.php',
-		);
-
-		if ( in_array( $template, $candidates, true ) ) {
-			return trailingslashit( DDA_INCIDENT_REPORT_DIR . 'tutor-templates' );
-		}
-
-		return $template_location;
 	}
 
 	private function dashboard_url() {

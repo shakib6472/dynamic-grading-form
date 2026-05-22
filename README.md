@@ -24,6 +24,16 @@ A WordPress plugin that publishes the **DC Government DDA Incident Report** as a
 
 4. *(Optional but recommended)* Install and activate **TutorLMS** (free) or **Tutor LMS Pro**. Anyone with the `tutor_instructor` role will see a new **Incident Reports** tab on the TutorLMS frontend dashboard — they can grade reports without needing access to `/wp-admin/`.
 
+5. *(Required for the TutorLMS tab to render)* Copy the loader file the plugin ships with into your **active theme**:
+
+   ```
+   m_o_form/theme-upload/tutor/dashboard/incident-reports.php
+            ↓
+   wp-content/themes/<your-active-theme>/tutor/dashboard/incident-reports.php
+   ```
+
+   Tutor LMS looks for dashboard sub-page templates inside the active theme's `tutor/dashboard/` folder first; the loader is a tiny passthrough that defers rendering to the plugin, so plugin updates keep the page in sync automatically. You only need to copy this one file once per theme.
+
 ---
 
 ## How learners use it (`[dda_incident_report]`)
