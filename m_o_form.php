@@ -3,7 +3,7 @@
  * Plugin Name:       DDA Incident Report Form
  * Plugin URI:        https://github.com/shakib6472/
  * Description:       Adds a shortcode [dda_incident_report] that displays the DC Government DDA Incident Report form. Submissions are stored as a custom post type (dda_incident) and reviewed by an admin or instructor; learners receive an automatic pass/fail email and see their result on the same page.
- * Version:           1.1.0
+ * Version:           2.0.1
  * Requires at least: 6.4
  * Requires PHP:      8.0
  * Author:            Shakib Shown
