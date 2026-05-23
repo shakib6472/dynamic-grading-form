@@ -174,7 +174,15 @@ class DDA_Incident_Report_Shortcode {
 	}
 
 	private function render_form() {
-		$submit_url = esc_url( admin_url( 'admin-post.php' ) );
+		// Post back to the current page (the shortcode host) so the
+		// submission is intercepted on template_redirect — keeps the
+		// POST off /wp-admin/admin-post.php (blocked by Tutor LMS Pro
+		// for subscribers/instructors).
+		$current_url = get_permalink();
+		if ( ! $current_url ) {
+			$current_url = home_url( isset( $_SERVER['REQUEST_URI'] ) ? (string) $_SERVER['REQUEST_URI'] : '/' );
+		}
+		$submit_url = esc_url( $current_url );
 		$user       = wp_get_current_user();
 		?>
 		<div class="dda-form-intro">
@@ -192,6 +200,7 @@ class DDA_Incident_Report_Shortcode {
 		<?php $this->render_scenario(); ?>
 
 		<form method="post" action="<?php echo $submit_url; ?>" class="dda-incident-form" novalidate>
+			<input type="hidden" name="dda_action" value="submit_report">
 			<input type="hidden" name="action" value="dda_incident_submit">
 			<?php wp_nonce_field( DDA_Incident_Report_Plugin::NONCE_ACTION, DDA_Incident_Report_Plugin::NONCE_NAME ); ?>
 

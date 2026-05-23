@@ -12,8 +12,29 @@ if ( ! defined( 'ABSPATH' ) ) {
 class DDA_Incident_Report_Form_Handler {
 
 	public function __construct() {
+		// Primary handler — fires on the shortcode page itself, so the
+		// POST never hits /wp-admin/admin-post.php. This sidesteps Tutor
+		// LMS Pro's "Disable admin access" feature, which would otherwise
+		// block subscribers / instructors with "Access Denied!".
+		add_action( 'template_redirect', array( $this, 'maybe_handle' ), 1 );
+
+		// Legacy admin-post.php endpoints kept as a fallback for users
+		// who can still reach /wp-admin/ (e.g. administrators).
 		add_action( 'admin_post_nopriv_dda_incident_submit', array( $this, 'handle' ) );
 		add_action( 'admin_post_dda_incident_submit', array( $this, 'handle' ) );
+	}
+
+	/**
+	 * Intercepts the form POST when it's submitted to the shortcode page.
+	 */
+	public function maybe_handle() {
+		if ( empty( $_SERVER['REQUEST_METHOD'] ) || 'POST' !== strtoupper( (string) $_SERVER['REQUEST_METHOD'] ) ) {
+			return;
+		}
+		if ( empty( $_POST['dda_action'] ) || 'submit_report' !== $_POST['dda_action'] ) {
+			return;
+		}
+		$this->handle();
 	}
 
 	public function handle() {
