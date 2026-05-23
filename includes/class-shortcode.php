@@ -23,25 +23,37 @@ class DDA_Incident_Report_Shortcode {
 	public function render( $atts ) {
 		$state = DDA_Incident_Report_User_State::get_state();
 
+		// Retake flow: when the learner failed their last attempt and
+		// clicks "Retake assessment" they arrive here with ?dda_retake=1.
+		// We render the blank form again so they can submit a new attempt.
+		$is_retake = (
+			DDA_Incident_Report_User_State::STATE_FAILED === $state
+			&& ! empty( $_GET['dda_retake'] )
+		);
+
 		ob_start();
 		echo '<div class="dda-incident-app">';
 
 		$this->maybe_render_flash_messages( $state );
 
-		switch ( $state ) {
-			case DDA_Incident_Report_User_State::STATE_GUEST:
-				$this->render_login_prompt();
-				break;
-			case DDA_Incident_Report_User_State::STATE_ELIGIBLE:
-				$this->render_form();
-				break;
-			case DDA_Incident_Report_User_State::STATE_AWAITING_REVIEW:
-				$this->render_awaiting();
-				break;
-			case DDA_Incident_Report_User_State::STATE_PASSED:
-			case DDA_Incident_Report_User_State::STATE_FAILED:
-				$this->render_result( $state );
-				break;
+		if ( $is_retake ) {
+			$this->render_form( true );
+		} else {
+			switch ( $state ) {
+				case DDA_Incident_Report_User_State::STATE_GUEST:
+					$this->render_login_prompt();
+					break;
+				case DDA_Incident_Report_User_State::STATE_ELIGIBLE:
+					$this->render_form( false );
+					break;
+				case DDA_Incident_Report_User_State::STATE_AWAITING_REVIEW:
+					$this->render_awaiting();
+					break;
+				case DDA_Incident_Report_User_State::STATE_PASSED:
+				case DDA_Incident_Report_User_State::STATE_FAILED:
+					$this->render_result( $state );
+					break;
+			}
 		}
 
 		echo '</div>';
@@ -62,6 +74,8 @@ class DDA_Incident_Report_Shortcode {
 				'missing_required'  => __( 'Please complete all required fields and try again.', 'dda-incident-report' ),
 				'login_required'    => __( 'You must be logged in to submit the form.', 'dda-incident-report' ),
 				'already_submitted' => __( 'You have already submitted a report. Only one submission per account is allowed.', 'dda-incident-report' ),
+				'awaiting_review'   => __( 'Your previous submission is still awaiting review. Please wait until it has been graded.', 'dda-incident-report' ),
+				'already_passed'    => __( 'You have already passed this assessment — no further submissions are needed.', 'dda-incident-report' ),
 				'insert_failed'     => __( 'Something went wrong while saving your report. Please try again.', 'dda-incident-report' ),
 			);
 			$code = sanitize_key( $_GET['dda_error'] );
@@ -169,11 +183,24 @@ class DDA_Incident_Report_Shortcode {
 					<p><?php echo nl2br( esc_html( $notes ) ); ?></p>
 				</div>
 			<?php endif; ?>
+
+			<?php if ( ! $passed ) :
+				$retake_url = add_query_arg( 'dda_retake', '1', get_permalink() );
+				?>
+				<div class="dda-result-actions">
+					<p class="dda-retake-note">
+						<?php esc_html_e( 'You did not meet the passing threshold. You may retake the assessment — a new attempt will be submitted for review.', 'dda-incident-report' ); ?>
+					</p>
+					<a class="dda-btn dda-btn-primary dda-btn-lg" href="<?php echo esc_url( $retake_url ); ?>#dda-incident-app">
+						<?php esc_html_e( 'Retake assessment', 'dda-incident-report' ); ?>
+					</a>
+				</div>
+			<?php endif; ?>
 		</div>
 		<?php
 	}
 
-	private function render_form() {
+	private function render_form( $is_retake = false ) {
 		// Post back to the current page (the shortcode host) so the
 		// submission is intercepted on template_redirect — keeps the
 		// POST off /wp-admin/admin-post.php (blocked by Tutor LMS Pro
@@ -186,9 +213,21 @@ class DDA_Incident_Report_Shortcode {
 		$user       = wp_get_current_user();
 		?>
 		<div class="dda-form-intro">
-			<span class="dda-pill dda-pill-info"><?php esc_html_e( 'Assessment', 'dda-incident-report' ); ?></span>
-			<h2 class="dda-heading"><?php esc_html_e( 'DDA Incident Report', 'dda-incident-report' ); ?></h2>
-			<p class="dda-lead"><?php esc_html_e( 'Read the scenario below, then complete every required field. You can only submit this form once — please review your answers carefully before submitting.', 'dda-incident-report' ); ?></p>
+			<span class="dda-pill <?php echo $is_retake ? 'dda-pill-fail' : 'dda-pill-info'; ?>">
+				<?php echo $is_retake ? esc_html__( 'Retake', 'dda-incident-report' ) : esc_html__( 'Assessment', 'dda-incident-report' ); ?>
+			</span>
+			<h2 class="dda-heading">
+				<?php echo $is_retake
+					? esc_html__( 'Retake — DDA Incident Report', 'dda-incident-report' )
+					: esc_html__( 'DDA Incident Report', 'dda-incident-report' ); ?>
+			</h2>
+			<p class="dda-lead">
+				<?php if ( $is_retake ) : ?>
+					<?php esc_html_e( 'Your previous attempt did not meet the passing threshold. Read the scenario again, then submit a new, improved report — the instructor will review and grade this new attempt.', 'dda-incident-report' ); ?>
+				<?php else : ?>
+					<?php esc_html_e( 'Read the scenario below, then complete every required field. Please review your answers carefully before submitting.', 'dda-incident-report' ); ?>
+				<?php endif; ?>
+			</p>
 			<div class="dda-meta-line">
 				<?php
 				/* translators: %s: user display name */

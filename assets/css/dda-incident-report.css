@@ -755,3 +755,29 @@
 		padding: 16px 18px;
 	}
 }
+
+/* ---------- Retake CTA (on failed result card) ---------- */
+.dda-incident-app .dda-result-actions {
+	margin: 0 32px 32px;
+	padding: 22px 24px;
+	background: linear-gradient(180deg, #FFFFFF 0%, var(--dda-bg) 100%);
+	border: 1px solid var(--dda-border);
+	border-top: 4px solid var(--dda-primary);
+	border-radius: var(--dda-radius);
+	text-align: center;
+}
+
+.dda-incident-app .dda-retake-note {
+	color: var(--dda-text-muted);
+	font-size: 14px;
+	margin: 0 auto 14px;
+	max-width: 52ch;
+	line-height: 1.6;
+}
+
+@media (max-width: 720px) {
+	.dda-incident-app .dda-result-actions {
+		margin: 0 18px 22px;
+		padding: 18px 18px;
+	}
+}

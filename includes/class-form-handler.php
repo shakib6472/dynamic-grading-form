@@ -56,10 +56,20 @@ class DDA_Incident_Report_Form_Handler {
 
 		$user_id = get_current_user_id();
 
-		// One submission per user.
-		$existing = DDA_Incident_Report_User_State::get_report_id_for_user( $user_id );
-		if ( $existing ) {
-			wp_safe_redirect( add_query_arg( 'dda_error', 'already_submitted', $redirect ) );
+		// Allow one submission at a time per user, BUT permit a retake
+		// after the most recent attempt has been failed by a teacher.
+		// State-based check:
+		//   ELIGIBLE        → no report yet → allow
+		//   AWAITING_REVIEW → last attempt not yet graded → block
+		//   PASSED          → already passed → block
+		//   FAILED          → graded as fail → allow retake (new post)
+		$state = DDA_Incident_Report_User_State::get_state();
+		if ( DDA_Incident_Report_User_State::STATE_AWAITING_REVIEW === $state ) {
+			wp_safe_redirect( add_query_arg( 'dda_error', 'awaiting_review', $redirect ) );
+			exit;
+		}
+		if ( DDA_Incident_Report_User_State::STATE_PASSED === $state ) {
+			wp_safe_redirect( add_query_arg( 'dda_error', 'already_passed', $redirect ) );
 			exit;
 		}
 
