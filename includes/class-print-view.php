@@ -90,20 +90,76 @@ class DDA_Incident_Report_Print_View {
 	   ("Save as PDF" tends to strip @page margins). */
 	@page { size: Letter; margin: 0.4in 0.5in; }
 	@media print {
-		.no-print { display: none !important; }
-		.print-only-hide { display: none !important; }
+		.no-print,
+		.print-only-hide,
+		.scen-pgnum,
+		.page1-pgnum,
+		.page2-pgnum { display: none !important; }
+
 		body { background: #fff !important; margin: 0 !important; padding: 0 !important; }
+
+		/* Every container in the document must allow itself to break across
+		   pages — otherwise the browser dumps short sections onto fresh
+		   pages and creates the huge gaps we're trying to remove. */
+		.sheet,
+		.box,
+		.scen,
+		.cat-grid,
+		.cat-grid > tr > td,
+		table,
+		div { break-inside: auto !important; page-break-inside: auto !important; }
+
 		.sheet {
 			width: 100% !important;
 			max-width: 100% !important;
 			min-height: 0 !important;
+			height: auto !important;
 			margin: 0 !important;
 			padding: 0 !important;
 			box-shadow: none !important;
 			background: #fff !important;
-			page-break-after: auto;
-			break-after: auto;
+			page-break-before: auto !important;
+			page-break-after: auto !important;
+			break-before: auto !important;
+			break-after: auto !important;
 		}
+
+		/* The form's outer black box is the main reason content gets
+		   pushed onto a new page (browsers try to keep bordered boxes
+		   on one page). Drop the border and padding on print so
+		   content can flow across pages naturally. */
+		.box {
+			border: 0 !important;
+			padding: 0 !important;
+		}
+
+		/* The runner line at the top of the second sheet repeats data
+		   that's already on the first page. In a continuous flow it's
+		   redundant — hide it on print. */
+		.runner { display: none !important; }
+
+		/* Reset top margins on the first child of every sheet so we
+		   don't accumulate space when sheets stack. */
+		.sheet > *:first-child { margin-top: 0 !important; }
+
+		/* Tighten the DC header (sits at the top of the form section). */
+		.hdr h1, .hdr h2, .hdr h3 { margin: 0 !important; line-height: 1.1 !important; }
+		.hdr { padding-bottom: 3pt !important; }
+		.hdr .title { margin-top: 2pt !important; }
+
+		/* Tighten form sections. */
+		.note { padding-bottom: 2pt !important; margin-bottom: 4pt !important; }
+		.row  { margin: 1.5pt 0 !important; }
+		.blk-h { margin: 3pt 0 1pt !important; }
+		.sec-bar { margin: 4pt -8pt !important; padding: 2pt 8pt !important; }
+		.cat-grid > tr > td { padding: 3pt 5pt !important; }
+		.cat-grid ol li, .cat-grid .it { margin-bottom: 0.5pt !important; }
+		.desc-box { min-height: 0.9in !important; }
+		.desc-box.short { min-height: 0.55in !important; }
+		.notif-row { padding: 1pt 0 !important; }
+		.footer { margin-top: 6pt !important; }
+		.footer .dc-star { width: 20pt !important; height: 18pt !important; }
+		.footer .addr { font-size: 8pt !important; }
 	}
 	* { box-sizing: border-box; }
 	html, body { margin: 0; padding: 0; }
@@ -427,45 +483,45 @@ class DDA_Incident_Report_Print_View {
 		display: none;
 	}
 
-	/* ----- Scenario page (single page, prepended before form) ----- */
+	/* ----- Scenario block (flows directly into the form, no page break) ----- */
 	.scen {
 		font-family: 'Times New Roman', Times, serif;
 		color: #000;
-		font-size: 10pt;
-		line-height: 1.32;
+		font-size: 9.5pt;
+		line-height: 1.28;
 	}
 	.scen-banner {
 		background: linear-gradient(180deg, #1F4E79 0%, #2E75B6 100%);
 		color: #fff;
-		padding: 6pt 12pt;
+		padding: 4pt 10pt;
 		text-align: center;
 		font-family: Arial, Helvetica, sans-serif;
-		margin-bottom: 8pt;
+		margin-bottom: 5pt;
 	}
 	.scen-banner .b1 {
-		font-size: 8.5pt;
+		font-size: 7.5pt;
 		font-weight: 600;
 		letter-spacing: 0.06em;
 		text-transform: uppercase;
 		opacity: 0.85;
 	}
 	.scen-banner .b2 {
-		font-size: 12pt;
+		font-size: 11pt;
 		font-weight: 700;
-		margin-top: 1pt;
+		margin-top: 0;
 	}
 	.scen-title {
 		font-family: Arial, Helvetica, sans-serif;
 		color: #1F4E79;
 		font-weight: bold;
-		font-size: 12pt;
-		margin: 0 0 6pt;
+		font-size: 11pt;
+		margin: 0 0 3pt;
 	}
 	.scen-meta {
 		display: flex;
 		gap: 22pt;
-		margin: 4pt 0 8pt;
-		font-size: 9.5pt;
+		margin: 2pt 0 4pt;
+		font-size: 9pt;
 	}
 	.scen-meta .lbl { font-weight: bold; }
 	.scen-meta .fill {
@@ -476,51 +532,52 @@ class DDA_Incident_Report_Print_View {
 	}
 	.scen-meta .fill.short { min-width: 1.3in; }
 	.scen-section {
-		margin: 6pt 0;
+		margin: 3pt 0;
 	}
 	.scen-section .scen-lead {
 		font-weight: bold;
 		color: #1F4E79;
 		font-family: Arial, Helvetica, sans-serif;
-		font-size: 10pt;
-		margin-bottom: 2pt;
+		font-size: 9.5pt;
+		margin-bottom: 1pt;
 	}
 	.scen-narrative p {
-		margin: 0 0 4pt;
+		margin: 0 0 2pt;
 		text-align: justify;
-		font-size: 9.5pt;
-		line-height: 1.32;
+		font-size: 9pt;
+		line-height: 1.28;
 	}
 	.scen-additional {
 		border-left: 3pt solid #1F4E79;
 		background: #F3F8FC;
-		padding: 5pt 10pt;
-		margin: 6pt 0;
+		padding: 3pt 8pt;
+		margin: 4pt 0;
 	}
-	.scen-additional .scen-lead { margin-bottom: 1pt; }
+	.scen-additional .scen-lead { margin-bottom: 0; }
 	.scen-additional p {
 		margin: 0;
-		font-size: 9.5pt;
+		font-size: 9pt;
 	}
 	.scen-circle {
-		margin-top: 6pt;
+		margin-top: 3pt;
+		margin-bottom: 6pt;
 	}
 	.scen-circle ul {
-		margin: 3pt 0 0 0;
+		margin: 2pt 0 0 0;
 		padding: 0;
 		columns: 2;
-		column-gap: 18pt;
+		column-gap: 16pt;
 		list-style: none;
 	}
 	.scen-circle li {
-		margin: 1pt 0;
-		font-size: 9.5pt;
-		line-height: 1.35;
+		margin: 0;
+		font-size: 9pt;
+		line-height: 1.25;
 		break-inside: avoid;
 		-webkit-column-break-inside: avoid;
 		page-break-inside: avoid;
-		padding-left: 8pt;
-		text-indent: -8pt;
+		padding-left: 7pt;
+		text-indent: -7pt;
 	}
 	.scen-circle li::before {
 		content: "• ";
