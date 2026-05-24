@@ -88,7 +88,12 @@ class DDA_Incident_Report_Print_View {
 	/* Use zero @page margins and put all padding on .sheet so the
 	   margin shows up reliably regardless of browser print settings
 	   ("Save as PDF" tends to strip @page margins). */
-	@page { size: Letter; margin: 0.4in 0.5in; }
+	/* Chrome / Edge / Safari "Save as PDF" will frequently strip the
+	   @page margin (especially when the user picks "Default" or "None"
+	   in the print dialog), leaving content edge-to-edge. Put padding
+	   on body instead — that's content-level and browsers must honor
+	   it. We also keep @page margin: 0 so the two don't double up. */
+	@page { size: Letter; margin: 0; }
 	@media print {
 		.no-print,
 		.print-only-hide,
@@ -96,7 +101,11 @@ class DDA_Incident_Report_Print_View {
 		.page1-pgnum,
 		.page2-pgnum { display: none !important; }
 
-		body { background: #fff !important; margin: 0 !important; padding: 0 !important; }
+		html, body { background: #fff !important; }
+		body {
+			margin: 0 !important;
+			padding: 0.5in 0.6in !important;
+		}
 
 		/* Every container in the document must allow itself to break across
 		   pages — otherwise the browser dumps short sections onto fresh
