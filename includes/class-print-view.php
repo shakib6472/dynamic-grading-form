@@ -88,12 +88,15 @@ class DDA_Incident_Report_Print_View {
 	/* Use zero @page margins and put all padding on .sheet so the
 	   margin shows up reliably regardless of browser print settings
 	   ("Save as PDF" tends to strip @page margins). */
-	/* Chrome / Edge / Safari "Save as PDF" will frequently strip the
-	   @page margin (especially when the user picks "Default" or "None"
-	   in the print dialog), leaving content edge-to-edge. Put padding
-	   on body instead — that's content-level and browsers must honor
-	   it. We also keep @page margin: 0 so the two don't double up. */
-	@page { size: Letter; margin: 0; }
+	/* @page margins are the ONLY CSS mechanism that gives per-printed-
+	   page margins (including the top/bottom of every page where a
+	   natural break happens). Body padding only applies to the start
+	   of the document and the end — middle-page breaks have no margin.
+	   For best results, the user's browser print dialog should keep
+	   "Margins" on its Default setting (which honors this @page rule).
+	   If they pick "None", margins go to zero — that's a browser-level
+	   override CSS can't fight. */
+	@page { size: Letter; margin: 0.5in 0.6in; }
 	@media print {
 		.no-print,
 		.print-only-hide,
@@ -104,7 +107,7 @@ class DDA_Incident_Report_Print_View {
 		html, body { background: #fff !important; }
 		body {
 			margin: 0 !important;
-			padding: 0.5in 0.6in !important;
+			padding: 0 !important;
 		}
 
 		/* Every container in the document must allow itself to break across
@@ -169,6 +172,38 @@ class DDA_Incident_Report_Print_View {
 		.footer { margin-top: 6pt !important; }
 		.footer .dc-star { width: 20pt !important; height: 18pt !important; }
 		.footer .addr { font-size: 8pt !important; }
+
+		/* --- Group cohesion -----------------------------------------
+		   The earlier "auto" inside-break setting is the right default
+		   (it stops the browser from dumping whole sections onto fresh
+		   pages and creating gaps). But individual logical groups still
+		   shouldn't be split mid-row, mid-block, or mid-checkbox. The
+		   selectors below override `auto` JUST for those small groups,
+		   so a row stays whole, a header stays attached to its first
+		   row, etc. */
+		.row,
+		.notif-row,
+		.cat-grid ol li,
+		.cat-grid .it,
+		.scen-additional,
+		.scen-meta,
+		.footer { break-inside: avoid !important; page-break-inside: avoid !important; }
+
+		/* Keep a section bar / block-heading attached to whatever
+		   immediately follows it — no orphan headers at the page
+		   bottom. */
+		.sec-bar,
+		.blk-h,
+		.desc-h,
+		.notif-h,
+		.scen-banner,
+		.scen-title,
+		.scen-section .scen-lead { break-after: avoid !important; page-break-after: avoid !important; }
+
+		/* Keep grouped rows together (Other Persons, Staff, header
+		   identification block, etc.). The .keep-together class is
+		   applied to <div> wrappers in the HTML. */
+		.keep-together { break-inside: avoid !important; page-break-inside: avoid !important; }
 	}
 	* { box-sizing: border-box; }
 	html, body { margin: 0; padding: 0; }
@@ -742,22 +777,26 @@ class DDA_Incident_Report_Print_View {
 			<span class="fill xlong"><?php echo esc_html( (string) $g( 'incident_provider_name' ) ); ?></span>
 		</div>
 
-		<div class="blk-h">OTHER PERSON&rsquo;S Supported by DDA Involved:</div>
-		<?php for ( $i = 1; $i <= 3; $i++ ) : ?>
-		<div class="row" style="padding-left: 18pt;">
-			Name: <span class="fill long"><?php echo esc_html( (string) $g( "other_person_{$i}_name" ) ); ?></span>
-			&nbsp;Date of Birth: <span class="fill"><?php echo esc_html( (string) $g( "other_person_{$i}_dob" ) ); ?></span>
+		<div class="keep-together">
+			<div class="blk-h">OTHER PERSON&rsquo;S Supported by DDA Involved:</div>
+			<?php for ( $i = 1; $i <= 3; $i++ ) : ?>
+			<div class="row" style="padding-left: 18pt;">
+				Name: <span class="fill long"><?php echo esc_html( (string) $g( "other_person_{$i}_name" ) ); ?></span>
+				&nbsp;Date of Birth: <span class="fill"><?php echo esc_html( (string) $g( "other_person_{$i}_dob" ) ); ?></span>
+			</div>
+			<?php endfor; ?>
 		</div>
-		<?php endfor; ?>
 
-		<div class="blk-h" style="display: inline;">STAFF INVOLVED:</div>
-		<?php for ( $i = 1; $i <= 2; $i++ ) : ?>
-		<div class="row" style="padding-left: <?php echo 1 === $i ? '0' : '18pt'; ?>;">
-			<?php if ( 1 === $i ) : ?>&nbsp;<?php endif; ?>
-			Name: <span class="fill long"><?php echo esc_html( (string) $g( "staff_{$i}_name" ) ); ?></span>
-			&nbsp;Phone: <span class="fill"><?php echo esc_html( (string) $g( "staff_{$i}_phone" ) ); ?></span>
+		<div class="keep-together">
+			<div class="blk-h" style="display: inline;">STAFF INVOLVED:</div>
+			<?php for ( $i = 1; $i <= 2; $i++ ) : ?>
+			<div class="row" style="padding-left: <?php echo 1 === $i ? '0' : '18pt'; ?>;">
+				<?php if ( 1 === $i ) : ?>&nbsp;<?php endif; ?>
+				Name: <span class="fill long"><?php echo esc_html( (string) $g( "staff_{$i}_name" ) ); ?></span>
+				&nbsp;Phone: <span class="fill"><?php echo esc_html( (string) $g( "staff_{$i}_phone" ) ); ?></span>
+			</div>
+			<?php endfor; ?>
 		</div>
-		<?php endfor; ?>
 
 		<div class="row">
 			Name of Person Reporting this Incident:
@@ -943,24 +982,30 @@ class DDA_Incident_Report_Print_View {
 			<span class="fill long"><?php echo esc_html( (string) $g( 'reporter_type_other' ) ); ?></span>
 		</div>
 
-		<?php for ( $i = 1; $i <= 2; $i++ ) : ?>
-		<div class="row">
-			Witness Name: <span class="fill long"><?php echo esc_html( (string) $g( "witness_{$i}_name" ) ); ?></span>
-			&nbsp;Witness Telephone Number: <span class="fill long"><?php echo esc_html( (string) $g( "witness_{$i}_phone" ) ); ?></span>
+		<div class="keep-together">
+			<?php for ( $i = 1; $i <= 2; $i++ ) : ?>
+			<div class="row">
+				Witness Name: <span class="fill long"><?php echo esc_html( (string) $g( "witness_{$i}_name" ) ); ?></span>
+				&nbsp;Witness Telephone Number: <span class="fill long"><?php echo esc_html( (string) $g( "witness_{$i}_phone" ) ); ?></span>
+			</div>
+			<?php endfor; ?>
 		</div>
-		<?php endfor; ?>
 
-		<div class="desc-h">
-			Description of the Incident: Who? What? When? Where? How?
-			<span class="muted">(Please provide all information in a clear and concise manner)</span>
+		<div class="keep-together">
+			<div class="desc-h">
+				Description of the Incident: Who? What? When? Where? How?
+				<span class="muted">(Please provide all information in a clear and concise manner)</span>
+			</div>
+			<div class="desc-box"><?php echo nl2br( esc_html( (string) $g( 'incident_description' ) ) ); ?></div>
 		</div>
-		<div class="desc-box"><?php echo nl2br( esc_html( (string) $g( 'incident_description' ) ) ); ?></div>
 
-		<div class="desc-h">
-			Immediate Actions Taken
-			<span class="muted">(Please provide information on all action taken)</span>
+		<div class="keep-together">
+			<div class="desc-h">
+				Immediate Actions Taken
+				<span class="muted">(Please provide information on all action taken)</span>
+			</div>
+			<div class="desc-box short"><?php echo nl2br( esc_html( (string) $g( 'immediate_actions' ) ) ); ?></div>
 		</div>
-		<div class="desc-box short"><?php echo nl2br( esc_html( (string) $g( 'immediate_actions' ) ) ); ?></div>
 
 		<div class="row" style="border-top: 1pt solid #000; padding-top: 4pt;">
 			Signature of Reporter
