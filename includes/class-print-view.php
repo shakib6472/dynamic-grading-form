@@ -88,22 +88,19 @@ class DDA_Incident_Report_Print_View {
 	/* Use zero @page margins and put all padding on .sheet so the
 	   margin shows up reliably regardless of browser print settings
 	   ("Save as PDF" tends to strip @page margins). */
-	@page { size: Letter; margin: 0; }
+	@page { size: Letter; margin: 0.4in 0.5in; }
 	@media print {
 		.no-print { display: none !important; }
+		.print-only-hide { display: none !important; }
 		body { background: #fff !important; margin: 0 !important; padding: 0 !important; }
 		.sheet {
 			width: 100% !important;
 			max-width: 100% !important;
 			min-height: 0 !important;
 			margin: 0 !important;
-			padding: 0.45in 0.55in !important;
+			padding: 0 !important;
 			box-shadow: none !important;
 			background: #fff !important;
-			page-break-after: always;
-			break-after: page;
-		}
-		.sheet:last-of-type {
 			page-break-after: auto;
 			break-after: auto;
 		}
@@ -146,16 +143,31 @@ class DDA_Incident_Report_Print_View {
 		color: #fff;
 		border: 1px solid rgba(255,255,255,.5);
 	}
+	/* On-screen preview matches the printed output: one continuous
+	   document with no forced page breaks and tight spacing. */
 	.sheet {
 		width: 8.5in;
-		min-height: 11in;
-		margin: 16px auto;
+		margin: 0 auto;
 		background: #fff;
-		padding: 0.35in 0.45in;
-		box-shadow: 0 4px 16px rgba(0,0,0,.08);
-		page-break-after: always;
+		padding: 0 0.5in;
 	}
-	.sheet:last-of-type { page-break-after: auto; }
+	.sheet:first-of-type {
+		margin-top: 16px;
+		padding-top: 0.4in;
+		box-shadow: 0 4px 16px rgba(0,0,0,.08);
+		border-top-left-radius: 6px;
+		border-top-right-radius: 6px;
+	}
+	.sheet:last-of-type {
+		padding-bottom: 0.4in;
+		margin-bottom: 24px;
+		box-shadow: 0 4px 16px rgba(0,0,0,.08);
+		border-bottom-left-radius: 6px;
+		border-bottom-right-radius: 6px;
+	}
+	.sheet:only-of-type {
+		padding: 0.4in 0.5in;
+	}
 
 	/* ----- Header band ----- */
 	.hdr {
@@ -408,10 +420,11 @@ class DDA_Incident_Report_Print_View {
 		font-size: 9pt;
 	}
 
+	/* Page-number labels are kept in the DOM but hidden in both screen
+	   and print views — the user requested no per-page footers and no
+	   forced page breaks. */
 	.page1-pgnum, .page2-pgnum, .scen-pgnum {
-		text-align: center;
-		font-size: 9pt;
-		margin-top: 8pt;
+		display: none;
 	}
 
 	/* ----- Scenario page (single page, prepended before form) ----- */
