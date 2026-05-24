@@ -88,15 +88,20 @@ class DDA_Incident_Report_Print_View {
 	/* Use zero @page margins and put all padding on .sheet so the
 	   margin shows up reliably regardless of browser print settings
 	   ("Save as PDF" tends to strip @page margins). */
-	/* @page margins are the ONLY CSS mechanism that gives per-printed-
-	   page margins (including the top/bottom of every page where a
-	   natural break happens). Body padding only applies to the start
-	   of the document and the end — middle-page breaks have no margin.
-	   For best results, the user's browser print dialog should keep
-	   "Margins" on its Default setting (which honors this @page rule).
-	   If they pick "None", margins go to zero — that's a browser-level
-	   override CSS can't fight. */
-	@page { size: Letter; margin: 0.5in 0.6in; }
+	/* Margin strategy — belt-and-suspenders:
+	     - body { padding } gives reliable SIDE margins on every page
+	       plus TOP on the first page and BOTTOM on the last page,
+	       because body padding is content-level CSS the browser can't
+	       strip from the PDF.
+	     - @page { margin: top bottom 0 0 } adds top + bottom margins
+	       at EVERY page boundary, including the auto page breaks the
+	       browser inserts when content overflows.
+	     - The two don't double up on the sides because @page sides
+	       are 0; they DO add up on the first-page top and last-page
+	       bottom, which is fine (generous margins look fine there).
+	   If the user's print dialog has "Margins: None", @page is
+	   stripped — but body padding still keeps the outer edges padded. */
+	@page { size: A4; margin: 0.4in 0; }
 	@media print {
 		.no-print,
 		.print-only-hide,
@@ -107,7 +112,7 @@ class DDA_Incident_Report_Print_View {
 		html, body { background: #fff !important; }
 		body {
 			margin: 0 !important;
-			padding: 0 !important;
+			padding: 0.5in 0.85in !important;
 		}
 
 		/* Every container in the document must allow itself to break across
@@ -243,30 +248,30 @@ class DDA_Incident_Report_Print_View {
 		color: #fff;
 		border: 1px solid rgba(255,255,255,.5);
 	}
-	/* On-screen preview matches the printed output: one continuous
-	   document with no forced page breaks and tight spacing. */
+	/* On-screen preview matches the printed output: A4 width, one
+	   continuous document with no forced page breaks. */
 	.sheet {
-		width: 8.5in;
+		width: 8.27in; /* A4 width */
 		margin: 0 auto;
 		background: #fff;
-		padding: 0 0.5in;
+		padding: 0 0.85in;
 	}
 	.sheet:first-of-type {
 		margin-top: 16px;
-		padding-top: 0.4in;
+		padding-top: 0.75in;
 		box-shadow: 0 4px 16px rgba(0,0,0,.08);
 		border-top-left-radius: 6px;
 		border-top-right-radius: 6px;
 	}
 	.sheet:last-of-type {
-		padding-bottom: 0.4in;
+		padding-bottom: 0.75in;
 		margin-bottom: 24px;
 		box-shadow: 0 4px 16px rgba(0,0,0,.08);
 		border-bottom-left-radius: 6px;
 		border-bottom-right-radius: 6px;
 	}
 	.sheet:only-of-type {
-		padding: 0.4in 0.5in;
+		padding: 0.75in 0.85in;
 	}
 
 	/* ----- Header band ----- */
