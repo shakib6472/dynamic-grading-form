@@ -207,8 +207,18 @@ class DDA_Incident_Report_Print_View {
 
 		/* Keep grouped rows together (Other Persons, Staff, header
 		   identification block, etc.). The .keep-together class is
-		   applied to <div> wrappers in the HTML. */
-		.keep-together { break-inside: avoid !important; page-break-inside: avoid !important; }
+		   applied to <div> wrappers in the HTML.
+		   The padding-top is what gives a visible top margin when the
+		   browser auto-breaks the page and pushes a keep-together
+		   block to the top of a new page — without relying on @page
+		   margins (which the PDF pipeline often strips). When the
+		   block sits mid-page, padding-top adds slight breathing room
+		   between sections, which is also a nice readability win. */
+		.keep-together {
+			break-inside: avoid !important;
+			page-break-inside: avoid !important;
+			padding-top: 0.35in !important;
+		}
 	}
 	* { box-sizing: border-box; }
 	html, body { margin: 0; padding: 0; }
